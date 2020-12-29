@@ -39,7 +39,10 @@ self = stdenv.mkDerivation rec {
   ] ++ (if stdenv.isDarwin then [
     "PLAT=macosx"
   ] else [
-    "PLAT=linux"
+    (if (stdenv.lib.versionAtLeast luaversion "5.4") && (readline!=null) then
+      "PLAT=linux-readline"
+     else
+       "PLAT=linux")
   ]) ++ (if stdenv.buildPlatform != stdenv.hostPlatform then [
     "CC=${stdenv.hostPlatform.config}-gcc"
     "RANLIB=${stdenv.hostPlatform.config}-ranlib"
