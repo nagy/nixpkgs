@@ -49,6 +49,8 @@ self = stdenv.mkDerivation rec {
   ] else [])
   ;
 
+  enableParallelBuilding = true;
+
   configurePhase = ''
     runHook preConfigure
 
