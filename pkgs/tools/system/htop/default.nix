@@ -24,5 +24,6 @@ stdenv.mkDerivation rec {
     license = licenses.gpl2Only;
     platforms = with platforms; linux ++ freebsd ++ openbsd ++ darwin;
     maintainers = with maintainers; [ rob relrod ];
+    changelog = "https://raw.githubusercontent.com/htop-dev/${pname}/${version}/ChangeLog";
   };
 }
