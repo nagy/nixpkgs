@@ -32,5 +32,6 @@ rustPlatform.buildRustPackage rec {
     license = licenses.mit;
     platforms = platforms.linux;
     maintainers = with maintainers; [ mschneider ];
+    changelog = "https://raw.githubusercontent.com/leftwm/leftwm/${version}/CHANGELOG";
   };
 }
