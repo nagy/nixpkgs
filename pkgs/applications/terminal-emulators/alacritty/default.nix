@@ -131,5 +131,6 @@ rustPlatform.buildRustPackage rec {
     license = licenses.asl20;
     maintainers = with maintainers; [ Br1ght0ne mic92 cole-h ma27 ];
     platforms = platforms.unix;
+    changelog = "https://raw.githubusercontent.com/alacritty/alacritty/v${version}/CHANGELOG.md";
   };
 }
