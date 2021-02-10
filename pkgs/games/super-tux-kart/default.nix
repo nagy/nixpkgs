@@ -128,5 +128,6 @@ stdenv.mkDerivation rec {
     license = licenses.gpl2Plus;
     maintainers = with maintainers; [ pyrolagus peterhoeg ];
     platforms = with platforms; linux;
+    changelog = "https://raw.githubusercontent.com/supertuxkart/stk-code/${version}/CHANGELOG.md";
   };
 }
