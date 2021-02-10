@@ -28,5 +28,6 @@ stdenv.mkDerivation rec {
     license = licenses.isc;
     platforms = platforms.all;
     maintainers = with maintainers; [ pSub synthetica ];
+    changelog = "https://raw.githubusercontent.com/eradman/entr/4.7/NEWS";
   };
 }
