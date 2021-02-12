@@ -272,6 +272,21 @@ rec {
     ];
   };
 
+  spiffy = eggDerivation {
+    name = "spiffy-6.3";
+
+    src = fetchegg {
+      name = "spiffy";
+      version = "6.3";
+      sha256 = "0f22gfdyysgbm3q6cjibn1z1yavks3imxi1mxcyfmms3x91k5k3c";
+    };
+
+    buildInputs = [
+      intarweb
+      srfi-18
+    ];
+  };
+
   srfi-13 = eggDerivation {
     name = "srfi-13-0.3";
 
