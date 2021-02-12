@@ -96,6 +96,23 @@ rec {
     ];
   };
 
+  feature-test = eggDerivation {
+    name = "feature-test-0.2.0";
+
+    src = fetchegg {
+      name = "feature-test";
+      version = "0.2.0";
+      sha256 = "1dxdisv64d8alg6r45cwxf5gmdpcvql1hvlq808lgwphd7kvfpgr";
+
+    };
+
+    buildInputs = [
+      srfi-13
+      srfi-18
+      foreigners
+    ];
+  };
+
   matchable = eggDerivation {
     name = "matchable-1.1";
 
