@@ -81,6 +81,21 @@ rec {
     ];
   };
 
+  foreigners = eggDerivation {
+    name = "foreigners-1.5";
+
+    src = fetchegg {
+      name = "foreigners";
+      version = "1.5";
+      sha256 = "1mm91y61nlawgb7iqdrkz2fi9sc3fic07f5m1ig541b2hbscfiqy";
+
+    };
+
+    buildInputs = [
+      matchable
+    ];
+  };
+
   matchable = eggDerivation {
     name = "matchable-1.1";
 
