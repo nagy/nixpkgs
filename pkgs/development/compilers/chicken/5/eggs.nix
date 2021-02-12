@@ -239,6 +239,20 @@ rec {
     ];
   };
 
+  sendfile = eggDerivation {
+    name = "sendfile-1.8.3";
+
+    src = fetchegg {
+      name = "sendfile";
+      version = "1.8.3";
+      sha256 = "0acmydjxlrbq7bdspmrzv9q9l3gh4xxnbpi5g1d5mz1g2mjwgm63";
+    };
+
+    buildInputs = [
+      memory-mapped-files
+    ];
+  };
+
   srfi-13 = eggDerivation {
     name = "srfi-13-0.3";
 
