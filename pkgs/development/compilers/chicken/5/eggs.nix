@@ -50,6 +50,23 @@ rec {
     ];
   };
 
+  uri-common = eggDerivation {
+    name = "uri-common-2.0";
+
+    src = fetchegg {
+      name = "uri-common";
+      version = "2.0";
+      sha256 = "07rq7ppkyk3i85vqspc048pnj6gmjhj236z00chslli9xybqkgrd";
+
+    };
+
+    buildInputs = [
+       uri-generic
+       defstruct
+       srfi-13
+    ];
+  };
+
   matchable = eggDerivation {
     name = "matchable-1.1";
 
