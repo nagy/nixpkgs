@@ -162,6 +162,28 @@ rec {
     ];
   };
 
+  openssl = eggDerivation {
+    name = "openssl-2.0.7";
+
+    src = fetchegg {
+      name = "openssl";
+      version = "2.0.7";
+      sha256 = "174plgbc19j9a6h9bq4jyswkgpq2w934zlgv1f35bs81cyd1qcw8";
+
+    };
+
+    buildInputs = [
+      srfi-13
+      srfi-18
+      address-info
+      pkgs.openssl
+    ];
+
+    nativeBuildInputs = [
+      pkgs.pkg-config
+    ];
+  };
+
   matchable = eggDerivation {
     name = "matchable-1.1";
 

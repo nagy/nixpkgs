@@ -1,9 +1,8 @@
-{ newScope } :
+{ newScope, pkgs } :
 let
   callPackage = newScope self;
 
   self = {
-    pkgs = self;
 
     fetchegg = callPackage ./fetchegg { };
 

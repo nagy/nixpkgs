@@ -1,6 +1,7 @@
 { lib, stdenv, chicken, makeWrapper }:
 { name, src
 , buildInputs ? []
+, nativeBuildInputs ? []
 , chickenInstallFlags ? []
 , cscOptions          ? []
 , ...} @ args:
@@ -17,6 +18,7 @@ in
 stdenv.mkDerivation ({
   name = "chicken-${name}";
   propagatedBuildInputs = buildInputs;
+  inherit nativeBuildInputs;
   buildInputs = [ makeWrapper chicken ];
 
   CSC_OPTIONS = lib.concatStringsSep " " cscOptions;
