@@ -226,6 +226,19 @@ rec {
     ];
   };
 
+  memory-mapped-files = eggDerivation {
+    name = "memory-mapped-files-0.4";
+
+    src = fetchegg {
+      name = "memory-mapped-files";
+      version = "0.4";
+      sha256 = "0by3r18bj9fs0bs9w5czx84vssmr58br3x7pz1m3myb4mns3mpsc";
+    };
+
+    buildInputs = [
+    ];
+  };
+
   srfi-13 = eggDerivation {
     name = "srfi-13-0.3";
 
