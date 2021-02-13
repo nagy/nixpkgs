@@ -4,4 +4,5 @@ matchable
 apropos
 spiffy
 json
+tcp6
 sha2
