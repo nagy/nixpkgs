@@ -4,3 +4,4 @@ matchable
 apropos
 spiffy
 json
+sha2
