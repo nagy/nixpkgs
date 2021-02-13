@@ -2,3 +2,4 @@
 args
 matchable
 apropos
+spiffy
