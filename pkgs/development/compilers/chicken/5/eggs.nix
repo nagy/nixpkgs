@@ -382,4 +382,17 @@ rec {
     ];
   };
 
+  regex = eggDerivation {
+    name = "regex-2.0";
+
+    src = fetchegg {
+      name = "regex";
+      version = "2.0";
+      sha256 = "0qgqrrdr95yqggw8xyvb693nhizwqvf1fp9cjx9p3z80c4ih8j4j";
+    };
+
+    buildInputs = [
+    ];
+  };
+
 }
