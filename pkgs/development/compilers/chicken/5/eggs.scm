@@ -5,4 +5,5 @@ apropos
 spiffy
 json
 tcp6
+openssl
 sha2
