@@ -1,6 +1,8 @@
 { lib
 , stdenv
 , fetchFromGitHub
+, help2man
+, installShellFiles
 }:
 
 stdenv.mkDerivation rec {
@@ -14,13 +16,22 @@ stdenv.mkDerivation rec {
     sha256 = "sha256-dcNoGU08tu950PlwSghoZwGSaSbP8NJ5qhWUi3bAtZY=";
   };
 
-  enableParallelBuilding = true;
+  nativeBuildInputs = [ installShellFiles ];
+
+  outputs = [ "out" "man" ];
+
+  postBuild = lib.optionalString (stdenv.buildPlatform.canExecute stdenv.hostPlatform) ''
+    ${help2man}/bin/help2man ./darkhttpd \
+      --version-string=${version} --no-info --section 8 --output ${pname}.8
+  '';
 
   installPhase = ''
     runHook preInstall
-    install -Dm555 -t $out/bin darkhttpd
-    install -Dm444 -t $out/share/doc/${pname} README.md
-    head -n 18 darkhttpd.c > $out/share/doc/${pname}/LICENSE
+
+    install -Dm755 -t $out/bin darkhttpd
+    install -Dm644 -t $out/share/doc/${pname} README.md COPYING
+    installManPage ${pname}.8
+
     runHook postInstall
   '';
 

@@ -62,6 +62,7 @@ in {
   config = mkIf cfg.enable {
     systemd.services.darkhttpd = {
       description = "Dark HTTPd";
+      documentation = [ "man:darkhttpd(8)" ];
       wants = [ "network.target" ];
       after = [ "network.target" ];
       wantedBy = [ "multi-user.target" ];
