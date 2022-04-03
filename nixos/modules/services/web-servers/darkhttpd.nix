@@ -71,6 +71,11 @@ in {
         AmbientCapabilities = lib.mkIf (cfg.port < 1024) [ "CAP_NET_BIND_SERVICE" ];
         Restart = "on-failure";
         RestartSec = "2s";
+
+        # Hardening
+        ProtectProc = "invisible";
+        ProcSubset = "pid";
+        BindReadOnlyPaths = "/";
       };
     };
   };
