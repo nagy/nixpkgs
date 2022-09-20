@@ -6,6 +6,7 @@
 , jq
 , ncurses
 , python3
+, fmt_8
 , z3Support ? true
 , z3_4_11 ? null
 , cvc4Support ? gccStdenv.isLinux
@@ -36,13 +37,6 @@ let
     sha256 = "sha256-bRSX91+ROqG1C3nB9HSQaKgLzOHEFy9mrD2WW3PRBWU=";
   };
 
-  fmtlibVersion = "8.0.1";
-  fmtlibUrl = "https://github.com/fmtlib/fmt/archive/${fmtlibVersion}.tar.gz";
-  fmtlib = fetchzip {
-    url = fmtlibUrl;
-    sha256 = "1mnvxqsan034d2jiqnw2yvkljl7lwvhakmj5bscwp1fpkn655bbw";
-  };
-
   pname = "solc";
   version = "0.8.21";
   meta = with lib; {
@@ -66,13 +60,11 @@ let
         --replace "${jsoncppUrl}" ${jsoncpp}
       substituteInPlace cmake/range-v3.cmake \
         --replace "${range3Url}" ${range3}
-      substituteInPlace cmake/fmtlib.cmake \
-        --replace "${fmtlibUrl}" ${fmtlib}
     '';
 
     cmakeFlags = [
       "-DBoost_USE_STATIC_LIBS=OFF"
-
+      "-DFETCHCONTENT_SOURCE_DIR_FMTLIB=${fmt_8.src}"
     ] ++ (if z3Support then [
       "-DSTRICT_Z3_VERSION=OFF"
     ] else [
