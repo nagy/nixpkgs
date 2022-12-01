@@ -1,49 +1,51 @@
-# NixOS module for Freenet daemon
-{ config, lib, pkgs, ... }:
-let
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
+let
   cfg = config.services.freenet;
   varDir = "/var/lib/freenet";
-
 in
-
 {
-
-  ### configuration
-
   options = {
-
     services.freenet = {
-
-      enable = lib.mkOption {
-        type = lib.types.bool;
-        default = false;
-        description = "Enable the Freenet daemon";
-      };
+      enable = lib.mkEnableOption (lib.mdDoc "Freenet daemon");
 
       nice = lib.mkOption {
         type = lib.types.int;
         default = 10;
         description = "Set the nice level for the Freenet daemon";
       };
-
     };
-
   };
 
-  ### implementation
-
   config = lib.mkIf cfg.enable {
-
     systemd.services.freenet = {
-      description = "Freenet daemon";
+      inherit (pkgs.freenet.meta) description;
       after = [ "network.target" ];
       wantedBy = [ "multi-user.target" ];
-      serviceConfig.ExecStart = "${pkgs.freenet}/bin/freenet";
-      serviceConfig.User = "freenet";
-      serviceConfig.UMask = "0007";
-      serviceConfig.WorkingDirectory = varDir;
-      serviceConfig.Nice = cfg.nice;
+
+      serviceConfig = {
+        ExecStart = lib.getExe pkgs.freenet;
+        User = "freenet";
+        UMask = "0007";
+        WorkingDirectory = varDir;
+        Nice = cfg.nice;
+
+        # Hardening
+        PrivateDevices = true;
+        PrivateTmp = true;
+        RestrictRealtime = true;
+        RestrictAddressFamilies = [
+          "AF_INET"
+          "AF_INET6"
+        ];
+        NoNewPrivileges = true;
+        ProtectProc = "invisible";
+      };
     };
 
     users.users.freenet = {
@@ -57,4 +59,5 @@ in
     users.groups.freenet.gid = config.ids.gids.freenet;
   };
 
+  meta.maintainers = with lib.maintainers; [ nagy ];
 }
