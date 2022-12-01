@@ -33,6 +33,20 @@ in
         UMask = "0007";
         WorkingDirectory = varDir;
         Nice = cfg.nice;
+
+        # Hardening
+        PrivateDevices = true;
+        PrivateTmp = true;
+        RestrictRealtime = true;
+        RestrictNamespaces = true;
+        RestrictAddressFamilies = [
+          "AF_INET"
+          "AF_INET6"
+        ];
+        NoNewPrivileges = true;
+        ProtectProc = "invisible";
+        ProtectKernelModules = true;
+        ProtectKernelTunables = true;
       };
     };
 
