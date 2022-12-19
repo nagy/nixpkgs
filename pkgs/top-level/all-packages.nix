@@ -13877,8 +13877,7 @@ with pkgs;
   inherit (chickenPackages)
     fetchegg
     eggDerivation
-    chicken
-    egg2nix;
+    chicken;
 
   cc65 = callPackage ../development/compilers/cc65 { };
 
