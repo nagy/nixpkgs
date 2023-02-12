@@ -33,7 +33,7 @@ let
           "bsd-3-clause" = licenses.bsd3;
           "public-domain" = licenses.publicDomain;
         }).${license} or license;
-      }) (importJSON ./deps.json));
+      }) (importTOML ./deps.toml));
   };
 
 in lib.recurseIntoAttrs self
