@@ -1,19 +1,18 @@
-import ./make-test-python.nix ({ pkgs, ... }: {
-  name = "freenet";
-  meta = with pkgs.lib.maintainers; {
-    maintainers = [ nagy ];
-  };
+{ lib, ... }:
 
-  nodes = {
-    machine = { ... }: {
-      services.freenet.enable = true;
-    };
+{
+  name = "freenet";
+  meta.maintainers = [ lib.maintainers.nagy ];
+
+  nodes.machine = {
+    services.freenet.enable = true;
   };
 
   testScript = ''
     machine.wait_for_unit("freenet.service")
     machine.wait_for_open_port(8888)
-    machine.wait_until_succeeds("curl -sfL http://localhost:8888/ | grep Freenet")
+    assert "Freenet" in machine.wait_until_succeeds("curl -sfL localhost:8888")
     machine.succeed("systemctl stop freenet")
+    machine.wait_for_closed_port(8888)
   '';
-})
+}
