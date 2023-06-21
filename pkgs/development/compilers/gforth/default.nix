@@ -33,10 +33,6 @@ in stdenv.mkDerivation rec {
     "--build=x86_64-apple-darwin"
   ];
 
-  preConfigure = ''
-    mkdir -p ${lispDir}
-  '';
-
   meta = {
     description = "Forth implementation of the GNU project";
     homepage = "https://github.com/forthy42/gforth";
