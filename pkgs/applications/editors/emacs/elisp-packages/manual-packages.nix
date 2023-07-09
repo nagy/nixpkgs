@@ -19,6 +19,8 @@ lib.packagesFromDirectoryRecursive {
     inherit (pkgs) gh;
   };
 
+  lua = callPackage ./manual-packages/lua/package.nix { inherit (pkgs) stdenv lua; };
+
   lsp-bridge = callPackage ./manual-packages/lsp-bridge {
     inherit (pkgs) basedpyright git go gopls python3;
   };
