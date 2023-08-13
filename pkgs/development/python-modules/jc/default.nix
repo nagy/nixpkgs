@@ -10,6 +10,8 @@
   pygments,
   pytestCheckHook,
   pythonOlder,
+  tzdata,
+  python,
 }:
 
 buildPythonPackage rec {
@@ -47,8 +49,11 @@ buildPythonPackage rec {
 
   pythonImportsCheck = [ "jc" ];
 
-  # tests require timezone to set America/Los_Angeles
-  doCheck = false;
+  # tests require timezone set to America/Los_Angeles
+  preCheck = ''
+    export TZDIR=${tzdata}/${python.sitePackages}/tzdata/zoneinfo
+    export TZ=America/Los_Angeles
+  '';
 
   meta = with lib; {
     description = "This tool serializes the output of popular command line tools and filetypes to structured JSON output";
