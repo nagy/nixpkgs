@@ -22,6 +22,12 @@ in
         '';
       };
 
+      openFirewall = mkOption {
+        type = types.bool;
+        default = false;
+        description = "Open ports in the firewall for the nar-serve server";
+      };
+
       cacheURL = mkOption {
         type = types.str;
         default = "https://cache.nixos.org/";
@@ -64,5 +70,6 @@ in
         DynamicUser = true;
       };
     };
+    networking.firewall.allowedTCPPorts = lib.mkIf cfg.openFirewall [ cfg.port ];
   };
 }
