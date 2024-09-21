@@ -1,8 +1,8 @@
 { config, lib, pkgs, ... }:
 
-with lib;
-
 let
+  inherit (lib) mkIf mkOption concatStrings mapAttrsToList optionalString generators concatMapStrings boolToString mkRenamedOptionModule types optional;
+  inherit (lib.types) bool listOf str;
   cfg = config.services.nextcloud;
   fpm = config.services.phpfpm.pools.nextcloud;
 
@@ -80,9 +80,9 @@ let
     mkKeyValue = generators.mkKeyValueDefault {} " = ";
   };
 
-  phpCli = concatStringsSep " " ([
-    "${getExe phpPackage}"
-  ] ++ optionals (cfg.cli.memoryLimit != null) [
+  phpCli = lib.concatStringsSep " " ([
+    "${lib.getExe phpPackage}"
+  ] ++ lib.optionals (cfg.cli.memoryLimit != null) [
     "-dmemory_limit=${cfg.cli.memoryLimit}"
   ]);
 
@@ -104,8 +104,8 @@ let
   mysqlLocal = cfg.database.createLocally && cfg.config.dbtype == "mysql";
   pgsqlLocal = cfg.database.createLocally && cfg.config.dbtype == "pgsql";
 
-  nextcloudGreaterOrEqualThan = versionAtLeast cfg.package.version;
-  nextcloudOlderThan = versionOlder cfg.package.version;
+  nextcloudGreaterOrEqualThan = lib.versionAtLeast cfg.package.version;
+  nextcloudOlderThan = lib.versionOlder cfg.package.version;
 
   # https://github.com/nextcloud/documentation/pull/11179
   ocmProviderIsNotAStaticDirAnymore = nextcloudGreaterOrEqualThan "27.1.2"
@@ -819,7 +819,7 @@ in {
     };
   };
 
-  config = mkIf cfg.enable (mkMerge [
+  config = mkIf cfg.enable (lib.mkMerge [
     { warnings = let
         latest = 29;
         upgradeWarning = major: nixos:
@@ -869,7 +869,7 @@ in {
         if versionOlder cfg.package.version "29" then pkgs.php82
         else pkgs.php83;
 
-      services.nextcloud.phpOptions = mkMerge [
+      services.nextcloud.phpOptions = lib.mkMerge [
         (mapAttrs (const mkOptionDefault) defaultPHPSettings)
         {
           upload_max_filesize = cfg.maxUploadSize;
@@ -1068,7 +1068,7 @@ in {
             NEXTCLOUD_CONFIG_DIR = "${datadir}/config";
             PATH = "/run/wrappers/bin:/nix/var/nix/profiles/default/bin:/run/current-system/sw/bin:/usr/bin:/bin";
           };
-          settings = mapAttrs (name: mkDefault) {
+          settings = lib.mapAttrs (name: lib.mkDefault) {
             "listen.owner" = config.services.nginx.user;
             "listen.group" = config.services.nginx.group;
           } // cfg.poolSettings;
@@ -1111,7 +1111,7 @@ in {
 
       services.nextcloud = {
         caching.redis = lib.mkIf cfg.configureRedis true;
-        settings = mkMerge [({
+        settings = lib.mkMerge [({
           datadirectory = lib.mkDefault "${datadir}/data";
           trusted_domains = [ cfg.hostName ];
         }) (lib.mkIf cfg.configureRedis {
@@ -1124,7 +1124,7 @@ in {
         })];
       };
 
-      services.nginx.enable = mkDefault true;
+      services.nginx.enable = lib.mkDefault true;
 
       services.nginx.virtualHosts.${cfg.hostName} = {
         root = webroot;
