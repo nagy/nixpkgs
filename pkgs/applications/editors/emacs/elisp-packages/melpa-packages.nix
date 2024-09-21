@@ -333,6 +333,15 @@ let
           };
         });
 
+        jq-mode = super.jq-mode.overrideAttrs (attrs: {
+          postPatch = attrs.postPatch or "" + ''
+            substituteInPlace jq-mode.el \
+              --replace-fail 'jq-interactive-command "jq"' 'jq-interactive-command "${lib.getExe pkgs.jq}"'
+            substituteInPlace ob-jq.el \
+              --replace-fail 'org-babel-jq-command "jq"' 'org-babel-jq-command "${lib.getExe pkgs.jq}"'
+          '';
+        });
+
         sqlite3 = super.sqlite3.overrideAttrs (old: {
           buildInputs = (old.buildInputs or [ ]) ++ [ pkgs.sqlite ];
 
