@@ -129,10 +129,6 @@ in
   };
 
   config = mkIf cfg.enable (
-    let
-      binYggdrasil = "${cfg.package}/bin/yggdrasil";
-      binHjson = "${pkgs.hjson-go}/bin/hjson-cli";
-    in
     {
       assertions = [{
         assertion = config.networking.enableIPv6;
@@ -146,13 +142,13 @@ in
         before = [ "yggdrasil.service" ];
         serviceConfig.Type = "oneshot";
         serviceConfig.RemainAfterExit = true;
+        path = [ cfg.package pkgs.jq pkgs.hjson-go ];
         script = ''
           if [ ! -e ${keysPath} ]
           then
             mkdir --mode=700 -p ${builtins.dirOf keysPath}
-            ${binYggdrasil} -genconf -json \
-              | ${pkgs.jq}/bin/jq \
-                  'to_entries|map(select(.key|endswith("Key")))|from_entries' \
+            yggdrasil -genconf -json \
+              | jq 'to_entries|map(select(.key|endswith("Key")))|from_entries' \
               > ${keysPath}
           fi
         '';
@@ -176,6 +172,7 @@ in
         # pipefail` should make sure that the service is not started if the
         # preparation fails. Therefore, it is not necessary to move the
         # preparation to ExecStartPre.
+        path = [ cfg.package pkgs.jq pkgs.hjson-go ];
         script = ''
           set -euo pipefail
 
@@ -186,14 +183,14 @@ in
             + (lib.optionalString settingsProvided
               "'${builtins.toJSON cfg.settings}'")
             + (lib.optionalString configFileProvided
-              "$(${binHjson} -c \"$CREDENTIALS_DIRECTORY/yggdrasil.conf\")")
+              "$(hjson-cli -c \"$CREDENTIALS_DIRECTORY/yggdrasil.conf\")")
             + (lib.optionalString cfg.persistentKeys "$(cat ${keysPath})")
-            + " | ${pkgs.jq}/bin/jq -s add | ${binYggdrasil} -normaliseconf -useconf"
+            + " | jq -s add | yggdrasil -normaliseconf -useconf"
           else
-            "${binYggdrasil} -genconf") + " > /run/yggdrasil/yggdrasil.conf"}
+            "yggdrasil -genconf") + " > /run/yggdrasil/yggdrasil.conf"}
 
           # start yggdrasil
-          ${binYggdrasil} -useconffile /run/yggdrasil/yggdrasil.conf ${lib.strings.escapeShellArgs cfg.extraArgs}
+          exec yggdrasil -useconffile /run/yggdrasil/yggdrasil.conf ${lib.strings.escapeShellArgs cfg.extraArgs}
         '';
 
         serviceConfig = {
