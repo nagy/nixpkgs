@@ -5,17 +5,15 @@
   fetchFromGitHub,
   jdk17_headless,
   jre17_minimal,
-  gradle_7,
+  gradle,
   bash,
   coreutils,
   substituteAll,
   nixosTests,
-  fetchpatch,
   writeText,
 }:
 
 let
-  gradle = gradle_7;
   jdk = jdk17_headless;
   # Reduce closure size
   jre = jre17_minimal.override {
@@ -29,8 +27,6 @@ let
     ];
     jdk = jdk17_headless;
   };
-
-  version = "01497";
 
   freenet_ext = fetchurl {
     url = "https://github.com/freenet/fred/releases/download/build01495/freenet-ext.jar";
@@ -48,19 +44,10 @@ let
     '';
   };
 
-  patches = [
-    # gradle 7 support
-    # https://github.com/freenet/fred/pull/827
-    (fetchpatch {
-      url = "https://github.com/freenet/fred/commit/8991303493f2c0d9933f645337f0a7a5a979e70a.patch";
-      hash = "sha256-T1zymxRTADVhhwp2TyB+BC/J4gZsT/CUuMrT4COlpTY=";
-    })
-  ];
-
 in
 stdenv.mkDerivation rec {
   pname = "freenet";
-  inherit version patches;
+  version = "01499";
 
   src = fetchFromGitHub {
     owner = "freenet";
