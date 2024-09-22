@@ -99,6 +99,14 @@ in
     };
   });
 
+  kubed = super.kubed.overrideAttrs (attrs: {
+    postPatch = attrs.postPatch or "" + ''
+      find
+      substituteInPlace kubed.el \
+        --replace-fail 'kubed-kubectl-program "kubectl"' 'kubed-kubectl-program "${lib.getExe pkgs.kubectl}"'
+    '';
+  });
+
   plz = super.plz.overrideAttrs (old: {
     dontUnpack = false;
     postPatch =
