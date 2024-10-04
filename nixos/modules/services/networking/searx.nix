@@ -1,8 +1,7 @@
 { options, config, lib, pkgs, ... }:
 
-with lib;
-
 let
+  inherit (lib) types mkRenamedOptionModule mkOption literalExpression mkIf mkDefault mkPackageOption optionalAttrs;
   runDir = "/run/searx";
 
   cfg = config.services.searx;
@@ -268,5 +267,5 @@ in
     };
   };
 
-  meta.maintainers = with maintainers; [ rnhmjoj _999eagle ];
+  meta.maintainers = with lib.maintainers; [ rnhmjoj _999eagle ];
 }
