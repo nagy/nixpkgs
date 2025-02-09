@@ -1325,6 +1325,13 @@ let
           # https://github.com/purcell/hippie-expand-slime/issues/2
           hippie-expand-slime = addPackageRequires super.hippie-expand-slime [ self.slime ];
 
+          hledger-mode = super.hledger-mode.overrideAttrs (attrs: {
+            postPatch = (attrs.postPatch or "") + ''
+              substituteInPlace hledger-reports.el \
+                --replace-fail 'hledger-program "hledger"' 'hledger-program "${lib.getExe pkgs.hledger}"'
+            '';
+          });
+
           hyperbole = ignoreCompilationError (addPackageRequires (mkHome super.hyperbole) [ self.el-mock ]); # elisp error
 
           # needs non-existent "browser database directory" during compilation
