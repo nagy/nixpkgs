@@ -14,6 +14,8 @@ in
     services.freenet = {
       enable = lib.mkEnableOption "Freenet daemon";
 
+      package = lib.mkPackageOption pkgs "freenet" { };
+
       nice = lib.mkOption {
         type = lib.types.int;
         default = 10;
@@ -28,7 +30,7 @@ in
       after = [ "network.target" ];
       wantedBy = [ "multi-user.target" ];
       serviceConfig = {
-        ExecStart = lib.getExe pkgs.freenet;
+        ExecStart = lib.getExe cfg.package;
         User = "freenet";
         UMask = "0007";
         WorkingDirectory = varDir;
