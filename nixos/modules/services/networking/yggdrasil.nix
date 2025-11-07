@@ -235,7 +235,7 @@ in
             ProtectHome = "tmpfs";
             ProtectKernelModules = true;
             ProtectKernelTunables = true;
-            RestrictAddressFamilies = "AF_UNIX AF_INET AF_INET6 AF_NETLINK";
+            RestrictAddressFamilies = "AF_UNIX AF_INET AF_INET6 AF_NETLINK AF_VSOCK";
             RestrictNamespaces = true;
             RestrictRealtime = true;
             SystemCallArchitectures = "native";
