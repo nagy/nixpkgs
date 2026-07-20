@@ -28,10 +28,19 @@ let
   };
 in
 {
+  allegro =
+    old:
+    (addPkgConfig old)
+    // (addToBuildInputs (with pkgs; [ allegro5 libGL libGLU libx11 ]) old)
+    // {
+      env.NIX_CFLAGS_COMPILE = toString [
+        "-Wno-error=implicit-function-declaration"
+        "-Wno-error=incompatible-pointer-types"
+      ];
+    };
   breadline = addToBuildInputs pkgs.readline;
   blas = addToBuildInputsWithPkgConfig pkgs.blas;
   blosc = addToBuildInputs pkgs.c-blosc;
-  botan = broken;
   cairo =
     old:
     (addToBuildInputsWithPkgConfig pkgs.cairo old)
@@ -125,8 +134,9 @@ in
   lmdb-ht = addToBuildInputs pkgs.lmdb;
   magic = addToBuildInputs pkgs.file;
   magic-pipes = addToBuildInputs pkgs.chickenPackages_5.chickenEggs.regex;
-  # requires PCRE
-  mdh = broken;
+  mdh = old:
+    (addToBuildInputs pkgs.pcre old)
+    // (addToCscOptions [ "-C" "-std=gnu89" ] old);
   # missing dependency in upstream egg
   mistie = addToPropagatedBuildInputs (with chickenEggs; [ srfi-1 ]);
   mosquitto = addToPropagatedBuildInputs [ pkgs.mosquitto ];
@@ -325,24 +335,21 @@ in
     '';
   };
 
-  # mark broken
-  allegro =
-    old:
-    (broken old)
-    // {
-      # depends on 'chicken' egg, which doesn't exist, so we specify all the deps here (needs to be
-      # kept around even when marked as broken so that evaluation doesn't break due to the missing
-      # attribute).
-      propagatedBuildInputs = [
-        chickenEggs.foreigners
-      ];
-    };
+  # requires botan2 C API (botan/ffi.h), only botan3 packaged
+  botan = broken;
+  # missing CD graphics library (tecgraf); not packaged in nixpkgs
   canvas-draw = broken;
+  # cond-expand inside define-library not supported by r7rs egg
   gemini = broken;
+  # cond-expand inside define-library not supported by r7rs egg
   gemini-client = broken;
+  # missing IUP C library (tecgraf) and its dependency IM; not packaged in nixpkgs
   iup = broken;
+  # requires KiWi C library and SDL2; KiWi not packaged in nixpkgs
   kiwi = broken;
+  # needs qmake with uitools and multimedia modules; QMAKEPATH not propagated correctly
   qt-light = broken;
+  # incompatible with sundials-7.6.0 (v6+ API break)
   sundials = broken;
   # webkitgtk_4_0 was removed
   webview = broken;

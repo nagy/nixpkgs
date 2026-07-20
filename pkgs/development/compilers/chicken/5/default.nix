@@ -8,6 +8,7 @@ let
   # need not (and cannot) be installed as eggs. Instead of marking such eggs as broken, we remove
   # these invalid dependencies.
   invalidDependencies = [
+    "chicken"
     "srfi-4"
     "cond-expand"
     "http-curl"
