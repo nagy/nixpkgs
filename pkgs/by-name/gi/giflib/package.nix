@@ -57,8 +57,7 @@ stdenv.mkDerivation (finalAttrs: {
   ''
   + lib.optionalString stdenv.hostPlatform.isStatic ''
     # Upstream build system does not support NOT building shared libraries.
-    sed -i '/all:/ s/$(LIBGIFSO)//' Makefile
-    sed -i '/all:/ s/$(LIBUTILSO)//' Makefile
+    sed -i '/^all:/ s/ shared-lib//' Makefile
     sed -i '/-m 755 $(LIBGIFSO)/ d' Makefile
     sed -i '/ln -sf $(LIBGIFSOVER)/ d' Makefile
     sed -i '/ln -sf $(LIBGIFSOMAJOR)/ d' Makefile
