@@ -62,6 +62,9 @@ let
           pkgs.gobject-introspection
         ];
       });
+      cl-gobject-introspection-wrapper = super.cl-gobject-introspection-wrapper.overrideLispAttrs (o: {
+        patches = [ ./patches/cl-gobject-introspection-wrapper-skip-duplicate-functions.patch ];
+      });
       cl-mysql = super.cl-mysql.overrideLispAttrs (o: {
         nativeLibs = [ pkgs.mariadb.client ];
       });
