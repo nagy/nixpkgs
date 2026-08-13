@@ -1,10 +1,9 @@
 {
   lib,
   stdenv,
-  fetchurl,
   fetchFromGitHub,
   jdk_headless,
-  jre,
+  jre_headless,
   gradle_8,
   bash,
   coreutils,
@@ -16,11 +15,8 @@
 let
   gradle = gradle_8;
   jdk = jdk_headless;
-
-  freenet_ext = fetchurl {
-    url = "https://github.com/hyphanet/fred/releases/download/build01495/freenet-ext.jar";
-    hash = "sha256-MvKz1r7t9UE36i+aPr72dmbXafCWawjNF/19tZuk158=";
-  };
+  # headless daemon: the full JRE would drag the GUI stack into the closure
+  jre = jre_headless;
 
   seednodes = fetchFromGitHub {
     name = "freenet-seednodes";
@@ -66,23 +62,42 @@ stdenv.mkDerivation rec {
     data = ./deps.json;
   };
 
-  # using reproducible archives breaks the build
-  gradleInitScript = writeText "empty-init-script.gradle" "";
+  # Replaces the default gradle init script, whose reproducible-archive
+  # flags break this build. The only thing it adds is a task that copies
+  # the resolved runtime classpath (configurations.runtimeClasspath) next
+  # to the built jar; installPhase ships exactly those jars. Using gradle's
+  # own resolution means exactly one version of each artifact ends up in
+  # the classpath — no stale duplicates like the bcprov copy that used to
+  # need filtering out of the dependency cache.
+  gradleInitScript = writeText "copy-runtime-deps.gradle" ''
+    gradle.projectsLoaded {
+      rootProject.allprojects {
+        task copyRuntimeDeps(type: Copy) {
+          into new File(project.buildDir, 'runtime-deps')
+          // lazy: evaluated at execution, after the java plugin is applied
+          from { configurations.runtimeClasspath }
+        }
+      }
+    }
+  '';
 
   gradleFlags = [ "-Dorg.gradle.java.home=${jdk}" ];
 
-  gradleBuildTask = "jar";
+  gradleBuildTask = "jar copyRuntimeDeps";
 
   installPhase = ''
     runHook preInstall
 
     install -Dm644 build/libs/freenet.jar $out/share/freenet/freenet.jar
-    ln -s ${freenet_ext} $out/share/freenet/freenet-ext.jar
-    mkdir -p $out/bin
+    mkdir -p $out/bin $out/lib
+    # The jars gradle resolved for the runtime classpath; includes
+    # freenet-ext, byte-identical to the upstream release jar. The
+    # wrapper's classpath wildcard ($out/lib/*) is expanded by the JVM
+    # launcher, so no classpath string needs baking here.
+    install -Dm644 build/runtime-deps/*.jar $out/lib/
     install -Dm755 ${wrapper} $out/bin/freenet
-    export CLASSPATH="$(find ${mitmCache} -name "*.jar"| sort | grep -v bcprov-jdk15on-1.48.jar|tr $'\n' :):$out/share/freenet/freenet-ext.jar:$out/share/freenet/freenet.jar"
     substituteInPlace $out/bin/freenet \
-      --subst-var-by CLASSPATH "$CLASSPATH"
+      --subst-var-by CLASSPATH "$out/lib/*:$out/share/freenet/freenet.jar"
 
     runHook postInstall
   '';
