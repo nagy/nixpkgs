@@ -1,0 +1,33 @@
+The pipe-based thread kick mechanism is only used together with pthreads.
+WASI does not provide pipe(), and pthread support is disabled there, so
+guard the code accordingly.
+--- a/zbar/processor/posix.c
++++ b/zbar/processor/posix.c
+@@ -267,12 +267,14 @@ int _zbar_processor_init(zbar_processor_t *proc)
+     state->kick_fds[0] = state->kick_fds[1] = -1;
+ 
+     if (proc->threaded) {
++#ifdef HAVE_LIBPTHREAD
+ 	/* FIXME check errors */
+ 	if (pipe(state->kick_fds))
+ 	    return (err_capture(proc, SEV_FATAL, ZBAR_ERR_SYSTEM, __func__,
+ 				"failed to open pipe"));
+ 	add_poll(proc, state->kick_fds[0], proc_kick_handler);
+ 	proc_cache_polling(proc->state);
++#endif
+     }
+     return (0);
+ }
+@@ -280,11 +282,13 @@ int _zbar_processor_cleanup(zbar_processor_t *proc)
+ {
+     processor_state_t *state = proc->state;
++#ifdef HAVE_LIBPTHREAD
+     if (proc->threaded) {
+ 	close(state->kick_fds[0]);
+ 	close(state->kick_fds[1]);
+ 	state->kick_fds[0] = state->kick_fds[1] = -1;
+     }
++#endif
+     if (state->polling.fds) {
+ 	free(state->polling.fds);
+ 	state->polling.fds = NULL;

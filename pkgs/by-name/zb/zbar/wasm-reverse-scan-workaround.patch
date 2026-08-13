@@ -1,0 +1,18 @@
+Work around a miscompilation by LLVM's WebAssembly backend (clang 20/21):
+the reverse-direction density scan loop computes the pointer update
+`p += -1 + (uintptr_t)0 * w` from movedelta() as `p = -1` instead of
+`p -= 1` (after the "Merge disjoint stack slots" pass), which makes the
+second iteration read address 0xffffffff and trap.  Spell the update out
+as explicit decrements; semantically identical.
+--- a/zbar/img_scanner.c
++++ b/zbar/img_scanner.c
+@@ -962,7 +962,8 @@ static void *_zbar_scan_image(zbar_image_scanner_t *iscn, zbar_image_t *img)
+ 	    iscn->umin		= cx1;
+ 	    while (x >= cx0) {
+ 		uint8_t d = *p;
+-		movedelta(-1, 0);
++		--x;
++		--p;
+ 		zbar_scan_y(scn, d);
+ 	    }
+ 	    ASSERT_POS;

@@ -4,8 +4,9 @@
   fetchFromGitHub,
   fetchpatch,
   imagemagickBig,
+  withImagemagick ? !stdenv.hostPlatform.isWasi,
   pkg-config,
-  withXorg ? true,
+  withXorg ? !stdenv.hostPlatform.isWasi,
   libx11,
   libv4l,
   libsForQt5,
@@ -31,14 +32,15 @@
 stdenv.mkDerivation rec {
   pname = "zbar";
   version = "0.23.93";
-
   outputs = [
     "out"
     "lib"
     "dev"
     "doc"
-    "man"
-  ];
+  ]
+  # Man pages are only generated for zbarimg (ImageMagick) and zbarcam
+  # (video); without either the output would be empty.
+  ++ lib.optionals (enableVideo || withImagemagick) [ "man" ];
 
   src = fetchFromGitHub {
     owner = "mchehab";
@@ -62,8 +64,13 @@ stdenv.mkDerivation rec {
     # PR from fork not yet merged into upstream
     # See PR: https://github.com/mchehab/zbar/pull/299
     # Remove this patch if the PR is merged or if the issue is solved another way.
-    # See https://github.com/NixOS/nixpkgs/issues/456461 for discussion of the root issue
-    ./darwin-segfault-optimized-pointer-assignment.patch
+    # WASI has no pipe(); the kick mechanism requires pthreads which are
+    # disabled there.
+    ./wasi-no-pipe.patch
+    # LLVM's wasm32 backend miscompiles the movedelta() pointer update in the
+    # reverse density scan loop (clang 20/21: p += -1 becomes p = -1, trapping
+    # on the second read).  The explicit decrements are semantically identical.
+    ./wasm-reverse-scan-workaround.patch
   ];
 
   nativeBuildInputs = [
@@ -78,26 +85,30 @@ stdenv.mkDerivation rec {
     libsForQt5.qtbase
   ];
 
-  buildInputs = [
-    imagemagickBig
-    libintl
-  ]
-  ++ lib.optionals stdenv.hostPlatform.isDarwin [
-    libiconv
-  ]
-  ++ lib.optionals enableDbus [
-    dbus
-  ]
-  ++ lib.optionals withXorg [
-    libx11
-  ]
-  ++ lib.optionals enableVideo [
-    libv4l
-    gtk3
-    libsForQt5.qtbase
-    libsForQt5.qtwayland
-    libsForQt5.qtx11extras
-  ];
+  buildInputs =
+    [ ]
+    ++ lib.optionals withImagemagick [
+      imagemagickBig
+    ]
+    ++ lib.optionals (!stdenv.hostPlatform.isWasi) [
+      libintl
+    ]
+    ++ lib.optionals stdenv.hostPlatform.isDarwin [
+      libiconv
+    ]
+    ++ lib.optionals enableDbus [
+      dbus
+    ]
+    ++ lib.optionals withXorg [
+      libx11
+    ]
+    ++ lib.optionals enableVideo [
+      libv4l
+      gtk3
+      libsForQt5.qtbase
+      libsForQt5.qtwayland
+      libsForQt5.qtx11extras
+    ];
 
   nativeCheckInputs = [
     bash
@@ -147,9 +158,19 @@ stdenv.mkDerivation rec {
         "--without-gtk"
         "--without-qt"
       ]
-  );
+  )
+  ++ lib.optionals (!withImagemagick) [
+    "--without-imagemagick"
+  ]
+  ++ lib.optionals stdenv.hostPlatform.isWasi [
+    "--disable-nls"
+    "--disable-pthread"
+    "--without-jpeg"
+    "--disable-shared"
+    "--enable-static"
+  ];
 
-  doCheck = true;
+  doCheck = !stdenv.hostPlatform.isWasi;
 
   preCheck = lib.optionalString stdenv.hostPlatform.isDarwin ''
     export NIX_LDFLAGS="$NIX_LDFLAGS -largp"
@@ -175,7 +196,7 @@ stdenv.mkDerivation rec {
       Code.
     '';
     maintainers = with lib.maintainers; [ raskin ];
-    platforms = lib.platforms.unix;
+    platforms = lib.platforms.unix ++ lib.platforms.wasi;
     license = lib.licenses.lgpl21;
     homepage = "https://github.com/mchehab/zbar";
     mainProgram = "zbarimg";
