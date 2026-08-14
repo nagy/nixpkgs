@@ -3,10 +3,14 @@ set -eo pipefail
 PATH=@coreutils@/bin:$PATH
 export CLASSPATH=@CLASSPATH@
 
-export FREENET_HOME="$HOME/.local/share/freenet"
-if [ -n "$XDG_DATA_HOME" ] ; then
-  FREENET_HOME="$XDG_DATA_HOME/freenet"
+if [ -z "${FREENET_HOME:-}" ]; then
+  if [ -n "$XDG_DATA_HOME" ] ; then
+    FREENET_HOME="$XDG_DATA_HOME/freenet"
+  else
+    FREENET_HOME="$HOME/.local/share/freenet"
+  fi
 fi
+export FREENET_HOME
 
 mkdir -p -- $FREENET_HOME
 
