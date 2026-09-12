@@ -6,6 +6,7 @@
   poppler-utils,
   python3,
   tesseract5,
+  versionCheckHook,
 }:
 
 python3.pkgs.buildPythonApplication (finalAttrs: {
@@ -48,8 +49,8 @@ python3.pkgs.buildPythonApplication (finalAttrs: {
     ])
   ];
 
-  # Tests fails even when ran manually on my ubuntu machine !!
-  doCheck = false;
+  nativeInstallCheckInputs = [ versionCheckHook ];
+  doInstallCheck = true;
 
   pythonImportsCheck = [
     "invoice2data"
