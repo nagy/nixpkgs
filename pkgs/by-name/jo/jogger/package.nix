@@ -21,18 +21,18 @@
 
 stdenv.mkDerivation (finalAttrs: {
   pname = "jogger";
-  version = "1.2.5";
+  version = "1.4.0";
 
   src = fetchFromCodeberg {
     owner = "baarkerlounger";
     repo = "jogger";
     tag = finalAttrs.version;
-    hash = "sha256-bju9XXMT6HRHG9QViO+FQCYQ+llrC+GP/AlIha0mxkM=";
+    hash = "sha256-pY5U229cL3w78GIegke53aYMzumzkpzX/CxXm6VgqG0=";
   };
 
   cargoDeps = rustPlatform.fetchCargoVendor {
     inherit (finalAttrs) pname version src;
-    hash = "sha256-k4nUtFdwCWa8flSkOEQe7UqorpYPCGrcXHTvVOqoAQI=";
+    hash = "sha256-h+q8VATE5rEh4szBUkvsGl82qlhuKzILW6LPFhQqeEQ=";
   };
 
   nativeBuildInputs = [
