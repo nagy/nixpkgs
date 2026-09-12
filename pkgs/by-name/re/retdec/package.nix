@@ -59,8 +59,8 @@ let
     # only for tests
     owner = "keystone-engine";
     repo = "keystone";
-    rev = "d7ba8e378e5284e6384fc9ecd660ed5f6532e922";
-    sha256 = "1yzw3v8xvxh1rysh97y0i8y9svzbglx2zbsqjhrfx18vngh0x58f";
+    rev = "0d9567f08c0c23e8f604b2cad3d49450c93cfb40";
+    sha256 = "sha256-bz9L7+RHEh9bgk0iAEV/6dUiPEkf6stEseQ8Y0UrhvQ=";
   };
 
   retdec-support-version = "2019-03-08";
@@ -163,6 +163,11 @@ stdenv.mkDerivation (finalAttrs: {
   ]
   ++ lib.optional finalAttrs.doInstallCheck gtest;
 
+  # Vendored dependencies (e.g. llvm-project) use cmake_minimum_required < 3.5,
+  # removed in CMake >= 4. The env variable is inherited by ExternalProject
+  # configure steps, cmakeFlags alone would not reach them.
+  env.CMAKE_POLICY_VERSION_MINIMUM = "3.5";
+
   cmakeFlags = [
     (lib.cmakeBool "RETDEC_TESTS" finalAttrs.doInstallCheck) # build tests
     (lib.cmakeBool "RETDEC_DEV_TOOLS" buildDevTools) # build tools e.g. capstone2llvmir, retdectool
@@ -170,7 +175,21 @@ stdenv.mkDerivation (finalAttrs: {
   ]
   ++ lib.mapAttrsToList (k: v: lib.cmakeFeature "${k}_URL" "${v}") deps;
 
-  preConfigure = lib.concatStringsSep "\n" (lib.mapAttrsToList check-dep deps) + ''
+  preConfigure = ''
+    # GCC 15: <cstdint> no longer transitively included
+    substituteInPlace include/retdec/demangler/borland_ast_parser.h \
+      --replace-fail '#include <llvm/Demangle/StringView.h>' '#include <cstdint>
+    #include <llvm/Demangle/StringView.h>'
+
+    # keystone bumped to a master commit that fixes the build with CMake 4
+    substituteInPlace cmake/deps.cmake \
+      --replace-fail d7ba8e378e5284e6384fc9ecd660ed5f6532e922 0d9567f08c0c23e8f604b2cad3d49450c93cfb40
+
+    # new keystone uses GNUInstallDirs and installs into lib64; retdec expects lib
+    substituteInPlace deps/keystone/CMakeLists.txt \
+      --replace-fail '-DKEYSTONE_BUILD_STATIC_RUNTIME=''${RETDEC_MSVC_STATIC_RUNTIME}' '-DKEYSTONE_BUILD_STATIC_RUNTIME=''${RETDEC_MSVC_STATIC_RUNTIME}
+		-DCMAKE_INSTALL_LIBDIR=lib'
+  '' + lib.concatStringsSep "\n" (lib.mapAttrsToList check-dep deps) + ''
     cp -v ${install-share} ./support/install-share.py
 
     # the CMakeLists assume CMAKE_INSTALL_BINDIR, etc are path components but in Nix, they are absolute.
