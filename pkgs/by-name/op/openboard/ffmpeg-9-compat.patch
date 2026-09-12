@@ -1,0 +1,21 @@
+Use avcodec_get_supported_config instead of AVCodec.sample_fmts
+
+AVCodec.sample_fmts was removed in FFmpeg 9.0. Use the
+avcodec_get_supported_config() API (available since FFmpeg 6.1) to
+query the codec's supported sample formats instead.
+
+--- a/src/podcast/ffmpeg/UBFFmpegVideoEncoder.cpp
++++ b/src/podcast/ffmpeg/UBFFmpegVideoEncoder.cpp
+@@ -449,7 +449,11 @@ bool UBFFmpegVideoEncoder::initAudioCodec()
+         }
+ 
+         c->bit_rate = 96000;
+-        c->sample_fmt  = audioCodec->sample_fmts ? audioCodec->sample_fmts[0] : AV_SAMPLE_FMT_FLTP;// FLTP by default for AAC
++        const enum AVSampleFormat *sample_fmts = nullptr;
++        int num_sample_fmts = 0;
++        avcodec_get_supported_config(nullptr, audioCodec, AV_CODEC_CONFIG_SAMPLE_FORMAT, 0,
++                                     (const void **)&sample_fmts, &num_sample_fmts);
++        c->sample_fmt  = sample_fmts ? sample_fmts[0] : AV_SAMPLE_FMT_FLTP;// FLTP by default for AAC
+         c->sample_rate = mAudioSampleRate;
+ 
+ #if LIBAVUTIL_VERSION_INT < AV_VERSION_INT(57, 25, 100)

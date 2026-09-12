@@ -50,6 +50,7 @@ stdenv.mkDerivation (finalAttrs: {
 
   patches = [
     ./poppler-26-compat.patch # https://github.com/OpenBoard-org/OpenBoard/pull/1474
+    ./ffmpeg-9-compat.patch # AVCodec.sample_fmts removed in FFmpeg 9
   ];
 
   postPatch = ''
