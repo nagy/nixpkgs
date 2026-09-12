@@ -21,6 +21,7 @@ python3Packages.buildPythonPackage rec {
   ];
 
   dependencies = with python3Packages; [
+    packaging
     rich
   ];
 
@@ -30,6 +31,13 @@ python3Packages.buildPythonPackage rec {
 
   doCheck = false;
   pythonImportsCheck = [ "unsilence" ];
+
+  # Replace pkg_resources (removed from setuptools >= 81) with packaging
+  postPatch = ''
+    substituteInPlace unsilence/lib/tools/ffmpeg_version.py \
+      --replace-fail 'from pkg_resources import parse_version' \
+        'from packaging.version import parse as parse_version'
+  '';
 
   pythonRelaxDeps = [ "rich" ];
 
