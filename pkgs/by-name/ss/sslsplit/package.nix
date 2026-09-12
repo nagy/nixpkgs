@@ -45,6 +45,10 @@ stdenv.mkDerivation (finalAttrs: {
     "LIBNET_BASE=${lib.getDev libnet}"
   ];
 
+  # libevent_openssl lives in libevent's separate openssl output, but the
+  # build system only takes a single LIBEVENT_BASE for both -I and -L.
+  env.NIX_LDFLAGS = "-L${libevent.openssl}/lib";
+
   meta = {
     description = "Transparent SSL/TLS interception";
     homepage = "https://www.roe.ch/SSLsplit";
