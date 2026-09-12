@@ -40,11 +40,24 @@ buildPythonApplication (finalAttrs: {
 
   __darwinAllowLocalNetworking = true; # for oauth tests
 
-  disabledTests = lib.optionals stdenv.hostPlatform.isDarwin [
+  postPatch = ''
+    # python 3.14's curses.textpad.Textbox reads window.encoding
+    sed -i 's/^    def getyx(self):/    encoding = "utf-8"\n\n    def getyx(self):/' tests/conftest.py
+  '';
+
+  disabledTests = [
+    # Depends on python 3.14 webbrowser behavior: BROWSER=safari now
+    # resolves to MacOSXOSAScript instead of GenericBrowser.
+    "test_patch_webbrowser"
+    # Can't pickle local object 'Terminal.open_browser...'
+    "test_terminal_open_browser_display"
+    # python 3.14 curses.textpad.Textbox.gather() reads the window via
+    # win.instr()/win.encoding, which the test mocks do not implement.
+    "test_terminal_text_input"
+    "test_terminal_prompt_input"
+  ] ++ lib.optionals stdenv.hostPlatform.isDarwin [
     # AssertionError: assert ['pbcopy', 'w'] == ['xclip', '-s..., 'clipboard']
     "test_copy_nix"
-    # AttributeError: Can't get local object 'Terminal.open_browser.open_browser.<locals>.open_url_silent'
-    "test_terminal_open_browser_display"
   ];
 
   pythonImportsCheck = [ "tuir" ];
