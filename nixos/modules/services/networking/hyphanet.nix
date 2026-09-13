@@ -47,6 +47,7 @@ in
       description = "Hyphanet daemon user";
       home = varDir;
       createHome = true;
+      isSystemUser = true;
     };
 
     users.groups.${userName} = { };

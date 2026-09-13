@@ -8,13 +8,14 @@
   gradle_8,
   bash,
   coreutils,
+  gnupg,
   replaceVars,
   nixosTests,
   writeText,
 }:
 
 let
-  version = "1506";
+  version = "1507";
   gradle = gradle_8;
   jdk = jdk_headless;
 
@@ -44,12 +45,13 @@ stdenv.mkDerivation (finalAttrs: {
     owner = "hyphanet";
     repo = "fred";
     tag = "build0${version}";
-    hash = "sha256-MmI/e/Sh4WeSSw2//xpmJtF5/oC9+eauXnTMLuojb2A=";
+    hash = "sha256-05yx3RDdjUIyX6fD0iX1i1XLCxBmkpn0Ilj/INOXhU0=";
   };
 
   nativeBuildInputs = [
     gradle
     jdk
+    gnupg
   ];
 
   wrapper = replaceVars ./hyphanetWrapper {
@@ -67,6 +69,18 @@ stdenv.mkDerivation (finalAttrs: {
     inherit (finalAttrs) pname;
     data = ./deps.json;
   };
+
+  # Upstream's gradle/verification-metadata.xml references PGP keys
+  # (Guillaume Sauthier, Eclipse EE4J) that are missing from their
+  # verification-keyring.gpg, so Gradle fetches them from keyservers at
+  # build time, which is neither sandboxable nor reproducible. Import the
+  # keys (fingerprint-pinned by the metadata) into the keyring beforehand.
+  postPatch = ''
+    mkdir -p $TMPDIR/gnupg
+    GNUPGHOME=$TMPDIR/gnupg gpg --batch --quiet \
+      --no-default-keyring --keyring gradle/verification-keyring.gpg \
+      --import ${./gradle-verification-keys.asc}
+  '';
 
   # using reproducible archives breaks the build
   gradleInitScript = writeText "empty-init-script.gradle" "";
